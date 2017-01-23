@@ -38,7 +38,6 @@ H5P.MiniCourse = (function ($) {
       var courseUnit = new H5P.MiniCourse.CourseUnit(unit, contentId, i, self.$container);
       i++;
       maxScore += courseUnit.getMaxScore();
-
       courseUnit.appendTo($unitPanel);
       courseUnits.push(courseUnit);
 

@@ -51,8 +51,7 @@ H5P.MiniCourse.CourseUnit = (function ($, EventDispatcher) {
     };
 
     self.getMaxScore = function () {
-      console.log(options.maxScore);
-      return options.maxScore;
+      return options.maxScore ? options.maxScore : 0;
     };
 
     self.enable = function () {
