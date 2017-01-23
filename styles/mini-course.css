@@ -1,0 +1,157 @@
+.h5p-container {
+  overflow: hidden;
+}
+.h5p-progress-circle-header {
+  font-size: 110%;
+  margin: 0 0 1em 0;
+  text-transform: uppercase;
+}
+/*.mini-view .h5p-mini-course-results {
+  float:left;
+  width: 100%;
+}*/
+.results-placement-right .h5p-mini-course-results {
+  float: right;
+  border-left: 1px solid #ddd;
+}
+.results-placement-left .h5p-mini-course-results {
+  float: left;
+  border-right: 1px solid #ddd;
+}
+.results-placement-left .h5p-mini-course-progress,
+.results-placement-right .h5p-mini-course-progress {
+  border-bottom: 1px solid #ddd;
+}
+.results-placement-top .h5p-mini-course-progress {
+  border-right: 1px solid #ddd;
+}
+.results-placement-top .h5p-mini-course-results {
+  float: left;
+  width: 100%;
+  border-bottom: 1px solid #ddd;
+}
+.results-placement-top .h5p-mini-course-results > * {
+  width: 50%;
+}
+.results-placement-top .h5p-mini-course-units {
+  width: 100%;
+}
+.h5p-mini-course-results {
+  display: inline-block;
+  background-color: #fff;
+  box-sizing: border-box;
+  position: relative;
+  padding: 0;
+  text-align: center;
+  width: 12em;
+  vertical-align: top;
+  overflow: hidden;
+}
+.h5p-mini-course-results > * {
+  padding: 1em 0;
+  display: inline-block;
+  box-sizing: border-box;
+  width: 100%;
+}
+.h5p-mini-course-progress {
+/*  border-bottom: 1px solid #ddd;*/
+}
+/*
+.h5p-mini-course-score {
+  background-color: #333;
+  color: #fff;
+}
+*/
+.h5p-mini-course-units {
+  box-sizing: border-box;
+  float: left;
+  width: calc(100% - 12em);
+
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -moz-flex;
+  display: flex;
+  -webkit-align-items: stretch;
+  align-items: stretch;
+  -webkit-justify-content: flex-start;
+  justify-conten: flex-start;
+  -webkit-flex-direction: row;
+  flex-direction: row;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-align-content: flex-end;
+  align-content: flex-end;
+}
+.h5p-mini-course-units.finished {
+  opacity: 0;
+}
+.h5p-mini-course-endscreen {
+  font-size: 1.5em;
+  text-align: center;
+  position: absolute;
+  top: -5em;
+  transition: all .5s;
+  padding: 0 1em;
+}
+.results-placement-right .h5p-mini-course-endscreen {
+  left: 0em;
+  width: calc(100% - 8em);
+}
+.results-placement-left .h5p-mini-course-endscreen {
+  left: 0em;
+  width: calc(100% - 8em);
+}
+.results-placement-top .h5p-mini-course-endscreen {
+  left: 0em;
+  width: 100%;
+}
+.h5p-mini-course-endscreen.visible {
+  top: 2em;
+}
+button.h5p-mini-course-unit-restart {
+  display: block;
+  margin: 1rem auto !important;
+}
+.h5p-mini-course-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+  text-align: center;
+  cursor: pointer;
+  display: none;
+}
+.h5p-mini-course-force-fullscreen .h5p-mini-course-overlay {
+  display: block;
+}
+.h5p-mini-course-overlay.hide {
+  display: none;
+}
+.h5p-mini-course-go-fullscreen {
+  font-size: 2rem;
+  padding: 2em;
+  background: #222;
+  color: #fff;
+  border-radius: .5rem;
+  display: inline-block;
+  position: relative;
+  top: 50%;
+  transform: perspective(1px) translateY(-50%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.h5p-mini-course-go-fullscreen:before {
+  display: block;
+  text-align: center;
+  font-family: "H5PFontAwesome4";
+  content: "\f01d";
+  font-size: 4rem;
+  height: 4rem;
+}
+.h5p-mini-course-overlay:hover .h5p-mini-course-go-fullscreen {
+  transform: perspective(1px) translateY(-50%) scale(1.05, 1.05);
+}
