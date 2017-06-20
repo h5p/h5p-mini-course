@@ -3,10 +3,12 @@
   "description": "Mini course consisting of lessons",
   "machineName": "H5P.MiniCourse",
   "majorVersion": 1,
-  "minorVersion": 0,
+  "minorVersion": 1,
   "patchVersion": 0,
   "runnable": 1,
-  "embedTypes": ["iframe"],
+  "embedTypes": [
+    "iframe"
+  ],
   "license": "MIT",
   "author": "Joubel AS (fnoks)",
   "coreApi": {
@@ -18,10 +20,19 @@
       "path": "styles/mini-course.css"
     },
     {
+      "path": "styles/h5p-mini-course-max-score-widget.css"
+    },
+    {
       "path": "styles/progress-circle.css"
     },
     {
       "path": "styles/course-unit.css"
+    },
+    {
+      "path": "styles/h5p-mini-course-summary.css"
+    },
+    {
+      "path": "styles/h5p-mini-course-popup.css"
     },
     {
       "path": "styles/overrides.css"
@@ -32,10 +43,19 @@
       "path": "scripts/mini-course.js"
     },
     {
+      "path": "scripts/h5p-mini-course-max-score-widget.js"
+    },
+    {
       "path": "scripts/progress-circle.js"
     },
     {
       "path": "scripts/course-unit.js"
+    },
+    {
+      "path": "scripts/h5p-mini-course-summary.js"
+    },
+    {
+      "path": "scripts/h5p-mini-course-popup.js"
     }
   ],
   "preloadedDependencies": [

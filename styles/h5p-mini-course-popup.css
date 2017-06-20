@@ -1,0 +1,88 @@
+.h5p-mini-course-popup-bg {
+  position: absolute;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0);
+  transition: all 1s;
+}
+.h5p-mini-course-popup-bg.visible {
+  background: rgba(0,0,0,0.9);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.h5p-mini-course-popup {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  position: relative;
+  top: -100%;
+  /*-webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);*/
+  transform: perspective(1px) translate3d( 0, 0, 0) translateY(-50%);
+  max-width: 700px;
+  min-height: 250px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  box-shadow: 0 0 30px rgba(0,0,0,0.08);
+  background-color: #fff;
+  border-radius: 2em;
+  /*overflow: hidden; TODO - Do we need this? */
+  transition: top 0.5s;
+}
+.h5p-mini-course-popup.summary {
+  height: 80%;
+}
+.h5p-mini-course-popup.visible {
+  top: 50%;
+}
+.h5p-mini-course-popup .header {
+  font-size: 120%;
+  padding: 1.5em 1.7em;
+  border-bottom: 1px solid #ccc;
+}
+.h5p-mini-course-popup .header-button {
+  position: absolute;
+  right: 1em;
+  cursor: pointer;
+}
+.h5p-mini-course-popup .header-button.skip-lesson {
+  color: #555;
+}
+.h5p-mini-course-popup .header-button.continue {
+  /*color: #fff;*/
+  top: 1em;
+}
+.h5p-mini-course-popup .header-button.continue:after {
+  font-family: "H5PFontAwesome4";
+  content: '\f061';
+  margin-left: 1em;
+  font-size: 0.5em;
+  line-height: 2em;
+  display: inline-block;
+  vertical-align: middle;
+}
+.h5p-mini-course-popup-close {
+  position: absolute;
+  right: -2em;
+  top: -2em;
+  color: #fff;
+  transition: transform 0.3s;
+  cursor: pointer;
+}
+.h5p-mini-course-popup-close:hover {
+  transform: scale(1.5) rotate(180deg);
+}
+.h5p-mini-course-popup-close:after {
+  font-family: 'H5PFontAwesome4';
+  font-size: 2em;
+  content: '\f00d';
+}
+/*.h5p-mini-course-popup a.skip-lesson:hover {
+  background-color: inherit;
+  color: inherit;
+  text-decoration: underline;
+}*/

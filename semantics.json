@@ -4,7 +4,7 @@
     "type": "list",
     "entity": "course unit",
     "label": "Course units",
-     "widgets": [
+    "widgets": [
       {
         "name": "VerticalTabs",
         "label": "Default"
@@ -40,23 +40,23 @@
             "H5P.Video 1.3",
             "H5P.Audio 1.2",
             "H5P.Collage 0.3",
-            "H5P.Column 1.3",
+            "H5P.Column 1.4",
             "H5P.Accordion 1.0",
             "H5P.Table 1.1",
             "H5P.ImageHotspots 1.5",
-            "H5P.ImageHotspotQuestion 1.4",
+            "H5P.ImageHotspotQuestion 1.5",
             "H5P.Blanks 1.7",
             "H5P.SingleChoiceSet 1.6",
             "H5P.MultiChoice 1.9",
             "H5P.TrueFalse 1.1",
-            "H5P.DragQuestion 1.8",
+            "H5P.DragQuestion 1.9",
             "H5P.Summary 1.7",
             "H5P.DragText 1.5",
             "H5P.MarkTheWords 1.6",
             "H5P.MemoryGame 1.1",
-            "H5P.QuestionSet 1.11",
-            "H5P.InteractiveVideo 1.14",
-            "H5P.CoursePresentation 1.15",
+            "H5P.QuestionSet 1.12",
+            "H5P.InteractiveVideo 1.15",
+            "H5P.CoursePresentation 1.16",
             "H5P.Timeline 1.1",
             "H5P.DocumentationTool 1.4",
             "H5P.TwitterUserFeed 1.0",
@@ -68,7 +68,7 @@
         {
           "label": "Max score",
           "name": "maxScore",
-          "description": "Only relevant for content that reports scoring",
+          "description": "If set to zero, continue button is displayed initially, and no confirmation is needed",
           "type": "number",
           "default": 0,
           "widget": "showWhen",
@@ -100,6 +100,25 @@
         }
       ]
     }
+  },
+  {
+    "name": "behaviour",
+    "type": "group",
+    "label": "Behaviour settings",
+    "fields": [
+      {
+        "name": "retry",
+        "type": "boolean",
+        "label": "Enable retry",
+        "default": true
+      },
+      {
+        "name": "forceSequential",
+        "type": "boolean",
+        "label": "Force user to interact with all course units in sequence",
+        "default": true
+      }
+    ]
   },
   {
     "name": "layout",
@@ -144,7 +163,7 @@
             "type": "number",
             "min": 0,
             "widget": "showWhen",
-            "default": 321,
+            "default": 500,
             "showWhen": {
               "detach": true,
               "rules": [
@@ -246,6 +265,102 @@
         "widget": "colorSelector",
         "default": "fff"
       }
+    ]
+  },
+  {
+    "name": "dictionary",
+    "label": "Dictionary",
+    "type": "group",
+    "common": true,
+    "fields": [
+      {
+        "name": "lessonStartLabel",
+        "type": "text",
+        "default": "Start Lesson"
+      },
+      {
+        "name": "lessonLockedLabel",
+        "type": "text",
+        "default": "Locked"
+      },
+      {
+        "name": "lessonCompletedLabel",
+        "type": "text",
+        "default": "Lesson completed"
+      },
+      {
+        "name": "skipLabel",
+        "type": "text",
+        "default": "Skip"
+      },
+      {
+        "name": "continueLabel",
+        "type": "text",
+        "default": "Continue"
+      },
+      {
+        "name": "maxScoreLabel",
+        "type": "text",
+        "default": "Max Score"
+      },
+      {
+        "name": "scoreLabel",
+        "type": "text",
+        "default": "Your Score"
+      },
+      {
+        "name": "progressLabel",
+        "type": "text",
+        "default": "Lessons Completed"
+      },
+      {
+        "name": "youGotLabel",
+        "type": "text",
+        "default": "You Got"
+      },
+      {
+        "name": "infoLessonLabel",
+        "type": "text",
+        "default": "Info Lesson"
+      },
+      {
+        "name": "infoLessonValue",
+        "type": "text",
+        "default": "0 points"
+      },
+      {
+        "name": "noScoreLabel",
+        "type": "text",
+        "default": "No Score"
+      },
+      {
+        "name": "retryButtonLabel",
+        "type": "text",
+        "default": "Retry"
+      },
+      {
+        "name": "summary",
+        "label": "Summary page",
+        "type": "group",
+        "fields": [
+          {
+            "name": "header",
+            "type": "text",
+            "default": "You have completed the mini course!"
+          },
+          {
+            "name": "overallResult",
+            "type": "text",
+            "default": "You won %score of %maxScore points!"
+          },
+          {
+            "name": "lessonPrefixLabel",
+            "type": "text",
+            "default": "Lesson %lessonIndex"
+          }
+        ]
+      }
+
     ]
   }
 ]

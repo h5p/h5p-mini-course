@@ -12,39 +12,40 @@ H5P.MiniCourse = (function ($) {
     var fullscreen = false;
     var maxScore = 0;
 
-    console.log(options);
-
-    var $results = $('<div>', {
-      'class': 'h5p-mini-course-results'
-    });
-
-    var $progressPanel = $('<div>', {
-      'class': 'h5p-mini-course-progress'
-    }).appendTo($results);
-
-    var $scorePanel = $('<div>', {
-      'class': 'h5p-mini-course-score'
-    }).appendTo($results);
-
     var $unitPanel = $('<div>', {
       'class': 'h5p-mini-course-units'
     });
 
     var courseUnits = [];
+    var results = [];
+    var popup;
     // Create course units
     var i=0;
+
+    // TODO do this in a function
     options.units.forEach(function (unit) {
 
-      var courseUnit = new H5P.MiniCourse.CourseUnit(unit, contentId, i, self.$container);
+      // TODO - Avoid this index thing - this is a symptom that something is wrong!
+      // Will also work bad when course units make be taken in a non-linear order
+      var courseUnit = new H5P.MiniCourse.CourseUnit(unit, contentId, i, options.dictionary);
       i++;
       maxScore += courseUnit.getMaxScore();
       courseUnit.appendTo($unitPanel);
       courseUnits.push(courseUnit);
 
+      console.log(options);
+      if (options.behaviour.forceSequential === false) {
+        courseUnit.enable();
+      }
+
+      // TODO - handle this in a function
       courseUnit.on('finished', function (event) {
 
-        $popupBg.removeClass('visible');
-        $popupBg.detach();
+        self.$container.css('min-height', '');
+        self.trigger('resize');
+
+        //$popupBg.removeClass('visible');
+        //$popupBg.detach();
 
         courseUnit.done();
         progress.increment();
@@ -52,40 +53,63 @@ H5P.MiniCourse = (function ($) {
           score.increment(event.data.score);
         }
 
+        // Save the score
+        results[event.data.index] = {
+          title: unit.header,
+          score: event.data.score,
+          maxScore: event.data.score
+        };
+
         if (event.data.index + 1 < courseUnits.length) {
           courseUnits[event.data.index + 1].enable();
         }
         else {
-          $unitPanel.parent().append($endScreen);
-
-          $unitPanel.addClass('finished');
-
-          setTimeout(function () {
-            $endScreen.addClass('visible');
-          }, 300);
-          // finished !!
-          // Do something cool!
+          showSummary();
         }
       });
 
       courseUnit.on('open-popup', function (event) {
-        console.log('JALLA', event);
-        $popupBg.append(event.data.popup).appendTo(fullscreen ? self.$container : $('body'));
+        showPopup(event.data.popupContent);
 
-        setTimeout(function () {
-          $popupBg.addClass('visible');
-        }, 200)
+        var progressedEvent = self.createXAPIEventTemplate('progressed');
+        progressedEvent.data.statement.object.definition.extensions['http://id.tincanapi.com/extension/ending-point'] = event.data.index + 1;
+        self.trigger(progressedEvent);
       });
 
       courseUnit.on('closing-popup', function (event) {
-        $popupBg.removeClass('visible');
+        //$popupBg.removeClass('visible');
+        popup.hide();
       });
     });
 
-    var progress = new H5P.MiniCourse.ProgressCircle(options.units.length, 'Progress', options.theme.fontColorResults, options.theme.progressCircleDefaultColor, options.theme.progressCircleActiveColor);
-    var score = new H5P.MiniCourse.ProgressCircle(maxScore, 'Score', options.theme.fontColorResults, options.theme.progressCircleDefaultColor, options.theme.progressCircleActiveColor);
+    var $results = $('<div>', {
+      'class': 'h5p-mini-course-results'
+    });
+
+    // Add minimize fullscreen icon:
+    $results.append($('<span>', {
+      'class': 'h5p-mini-course-exit-fullscreen',
+      click: function () {
+        H5P.exitFullScreen();
+      }
+    }));
+
+    var maxScoreWidget = new H5P.MiniCourse.MaxScoreWidget(maxScore, options.dictionary);
+    maxScoreWidget.getElement().appendTo($results);
+
+    var $scorePanel = $('<div>', {
+      'class': 'h5p-mini-course-score h5p-mini-course-result-panel'
+    }).appendTo($results);
+
+    var $progressPanel = $('<div>', {
+      'class': 'h5p-mini-course-progress h5p-mini-course-result-panel'
+    }).appendTo($results);
+
+    var score = new H5P.MiniCourse.ProgressCircle(maxScore, 'Your Score', false);
+    var progress = new H5P.MiniCourse.ProgressCircle(options.units.length, 'Lessons Completed', true);
+
     var currentPlacement;
-    var placementExceptions = {}
+    var placementExceptions = {};
     if (options.layout.resultsPlacement.exceptions) {
       options.layout.resultsPlacement.exceptions.forEach(function (exception) {
         placementExceptions[exception.columns] = exception.placement;
@@ -101,8 +125,6 @@ H5P.MiniCourse = (function ($) {
       fullscreen = false;
     });
 
-
-
     var $fullscreenOverlay = $('<div>', {
       'class': 'h5p-mini-course-overlay',
       html: '<div class="h5p-mini-course-go-fullscreen">Open mini course</div>',
@@ -114,27 +136,9 @@ H5P.MiniCourse = (function ($) {
       }
     });
 
-    var $endScreen = $('<div>', {
-      'class': 'h5p-mini-course-endscreen',
-      'html': 'Mini course finished, wanna try once more?'
-    }).append(H5P.JoubelUI.createButton({
-      'class': 'h5p-mini-course-unit-restart',
-      html:  'Try again', // TODO - translate
-      click: function () {
-        self.reset();
-      }
-    }));
-
-    var $popupBg = $('<div>', {
-      'class': 'h5p-mini-course-unit-popup-bg',
-      zIndex: options.layout.popupZIndex
-    });
-
     self.reset = function () {
-
       progress.reset();
       score.reset();
-
 
       // Reset all units
       courseUnits.forEach(function (unit) {
@@ -144,23 +148,41 @@ H5P.MiniCourse = (function ($) {
       // Enable first unit:
       courseUnits[0].enable();
 
-      $endScreen.removeClass('visible');
+      //$endScreen.removeClass('visible');
       setTimeout(function () {
         $unitPanel.removeClass('finished');
       }, 600);
     };
 
-  /*  var injectStyleTag = function () {
 
-      H5P.MiniCourse.Theme.generate(self.getLibraryFilePath('styles/theme-template.css'), options.theme.theme, undefined, contentId, function (css) {
-        self.$container.append(
-          '<style>' +
-          css +
-          options.theme.css +
-          '</style>'
-        );
-      })
-    };*/
+    var showPopup = function ($elements, extraClass) {
+      popup.show($elements, extraClass);
+      /*$popupBg.append($content).appendTo(self.$container);
+      setTimeout(function () {
+        $popupBg.addClass('visible');
+      }, 200);*/
+    };
+
+    var showSummary = function () {
+      // Create summary page:
+      for (var i = 0; i < 50; i++) {
+        results[i] = {
+          title: 'tittel',
+          score: 10,
+          maxScore: 20
+        };
+      }
+      var summary = new H5P.MiniCourse.Summary(score.getScore(), maxScore, results);
+      var $summaryElement = summary.getElement();
+
+      summary.on('retry', function (event) {
+        popup.hide();
+        $summaryElement.detach();
+        self.reset();
+      });
+
+      showPopup([$summaryElement], 'summary');
+    };
 
     var updateFullScreenButtonVisibility = function () {
       // If already in full screen, do nothing
@@ -180,6 +202,10 @@ H5P.MiniCourse = (function ($) {
     };
 
     self.resize = function () {
+
+      // If popup is showing
+
+      // self.$container.css('min-height', '600px');
 
       // If results widget is on top, we need to place it on right side to check
       // how many columns there will be
@@ -221,16 +247,20 @@ H5P.MiniCourse = (function ($) {
       currentPlacement = placement;
     }
 
+    /**
+     * Attach to container
+     * @param  {[type]} $container [description]
+     * @return {[type]}
+     */
     self.attach = function ($container) {
       self.$container = $container;
+      popup = new H5P.MiniCourse.Popup(1, self.$container); // TODO - use options
 
-      progress.appendTo($progressPanel);
+      // Something strange about the order here:
       score.appendTo($scorePanel);
+      progress.appendTo($progressPanel);
 
       $results.appendTo($container);
-
-      //injectStyleTag();
-
 
       courseUnits[0].enable();
       $unitPanel.appendTo($container);

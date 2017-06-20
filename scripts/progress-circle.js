@@ -11,23 +11,12 @@ H5P.MiniCourse.ProgressCircle = (function ($) {
       '</div>' +
       '<div class="shadow"></div>' +
     '</div>' +
-    '<div class="inset">' +
-    ' <div class="percentage" role="progressbar" aria-live="polite">' +
-    '	</div>' +
-    '</div>' +
+    '<div class="inset"></div>' +
   '</div>';
 
-  function ProgressWidget(totalScore, header) {
+  function ProgressWidget(totalScore, label, showTotal) {
     var self = this;
     var currentScore = 0;
-    //var $ui = $('.h5p-lections-score');
-    //$ui.empty();
-    //$ui.append('<div class="h5p-score-header" aria-hidden="true">Score</div>');
-    //$ui.append(progressTemplate);
-    //var $progress = $ui.find('.radial-progress');
-    //var $text = $ui.find('.percentage');
-
-
 
     self.increment = function (score) {
       currentScore += score || 1;
@@ -39,33 +28,48 @@ H5P.MiniCourse.ProgressCircle = (function ($) {
       updateUI();
     };
 
+    self.getScore = function () {
+      return currentScore;
+    };
+
     self.appendTo = function ($container) {
       self.$container = $container;
 
-      self.$container.append($('<div>', {
-        'class': 'h5p-progress-circle-header',
-        'aria-hidden': true,
-        html: header
-      }));
-
       self.$container.append(progressTemplate);
 
-      self.$progress = $container.find('.radial-progress');
-      self.$text = $container.find('.percentage');
+      // Create label:
+      self.$container.append($('<div>', {
+        'class': 'h5p-progress-circle-label',
+        /*'aria-hidden': true,*/
+        text: label
+      }));
 
-      self.$text.attr({
-        'aria-valuemin': 0,
-        'aria-valuemax': totalScore,
-        'aria-label': 'Score'
+      // Create textual representation of score/progress
+      self.$textualProgress = $('<div>', {
+        'class': 'h5p-progress-circle-textual-progress'
       });
+
+      self.$container.append(self.$textualProgress);
+
+      self.$progress = $container.find('.radial-progress');
+      self.$fullAndFill = $container.find('.circle .mask.full, .circle .fill');
+      self.$fillFix = $container.find('.circle .fill.fix');
 
       updateUI();
     };
 
     var updateUI = function () {
-      self.$text.html(currentScore + ' / ' + totalScore);
-      self.$progress.attr('data-progress', Math.ceil((currentScore/totalScore)*100));
-      self.$text.attr('aria-valuenow', currentScore);
+      if (currentScore > totalScore) {
+        currentScore = totalScore;
+      }
+
+      var k = Math.ceil((currentScore/totalScore)*100) * 1.8;
+
+      self.$fullAndFill.css('transform', 'rotate(' + k + 'deg)');
+      self.$fillFix.css('transform', 'rotate(' + (k * 2) + 'deg)');
+      self.$textualProgress.html(currentScore + '<span class="h5p-progress-circle-textual-progress-divider">/</span>' + totalScore);
+
+      //self.$text.attr('aria-valuenow', currentScore);
     };
 
   }

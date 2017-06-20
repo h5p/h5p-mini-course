@@ -1,3 +1,13 @@
 .questionset-results button {
   display: none;
 }
+
+
+/* Make some content types scrollable */
+.h5p-mini-course-popup.h5p-advancedtext {
+  max-height: 95%;
+
+}
+.h5p-mini-course-popup.h5p-advancedtext .h5p-sub-content {
+  overflow-x: auto;
+}

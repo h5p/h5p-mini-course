@@ -1,52 +1,90 @@
 H5P.MiniCourse.CourseUnit = (function ($, EventDispatcher) {
 
-  function CourseUnit(options, contentId, index, $popupContainer) {
+  function HeaderButton(dictionary) {
+    var self = this;
+    var state = 'skip';
+
+    EventDispatcher.call(self);
+
+    // Create dom element
+    var $action = $('<a>', {
+      'class': 'header-button skip-lesson',
+      'text': dictionary.skipLabel,
+      click: function () {
+        self.trigger(state);
+      }
+    });
+
+    self.getDomElement = function () {
+      return $action;
+    };
+
+    self.setState = function (newState) {
+      state = newState;
+      $action.toggleClass('h5p-joubelui-button continue', state === 'continue')
+             .toggleClass('skip-lesson', state === 'skip')
+             .text(state === 'skip' ? dictionary.skipLabel : dictionary.continueLabel);
+    };
+
+    self.skip = function () {
+      self.setState('skip');
+    };
+
+    self.continue = function () {
+      self.setState('continue');
+    };
+  }
+
+  // Inheritance
+  HeaderButton.prototype = Object.create(EventDispatcher.prototype);
+  HeaderButton.prototype.constructor = HeaderButton;
+
+  function UnitHeader(maxScore, dictionary) {
+    var self = this;
+    // States: ready, completed
+    var hasScore = !!maxScore;
+
+    var $element = $('<div>', {
+      'class': 'h5p-mini-course-unit-header'
+    });
+
+    var $label = $('<div>', {
+      'class': 'h5p-mini-course-unit-header-label'
+    }).appendTo($element);
+
+    var $value = $('<div>', {
+      'class': 'h5p-mini-course-unit-header-value'
+    }).appendTo($element);
+
+    self.getDomElement = function () {
+      return $element;
+    }
+
+    self.setState = function (state, score) {
+      $label.text(hasScore ? (state === 'ready' ? dictionary.maxScoreLabel : dictionary.youGotLabel) : dictionary.infoLessonLabel);
+      $value.text(hasScore ? (state === 'ready' ? maxScore + ' points' : score + ' of ' + maxScore + ' points') : dictionary.infoLessonValue);
+    }
+
+    // Initial setups
+    self.setState('ready');
+  }
+
+  function CourseUnit(options, contentId, index, dictionary) {
     var self = this;
     EventDispatcher.call(self);
 
     var instance;
     var enabled = false;
 
-    var $unitPopup = $('<div>', {
-      'class': 'h5p-mini-course-unit-popup'
-    });
-
     var libraryMeta = H5P.libraryFromString(options.action.library);
-
-    console.log(options);
-
-    var $unitPanel = $('<div>', {
-      'class': 'h5p-mini-course-unit-panel locked'
-    });
-
-    var $unitPanelInner = $('<div>', {
-      'class': 'h5p-mini-course-unit-panel-inner h5p-font-icon-enabled ' + libraryMeta.machineName.toLowerCase().replace('.', '-')
-    }).appendTo($unitPanel);
-
-    var $unitHeader = $('<div>', {
-      'class': 'h5p-mini-course-unit-header',
-      html: options.header
-    }).appendTo($unitPanelInner);
-
-    var $unitIntro = $('<div>', {
-      'class': 'h5p-mini-course-unit-intro',
-      html: options.intro
-    }).appendTo($unitPanelInner);
-
-    var $beginButton = H5P.JoubelUI.createButton({
-      'class': 'h5p-mini-course-unit-begin',
-      html:  'Locked', // TODO - translate
-      disabled: 'disabled',
-      click: function () {
-        self.show();
-      }
-    }).appendTo($unitPanelInner);
+    var machineName = libraryMeta.machineName.toLowerCase().replace('.', '-');
 
     self.appendTo = function ($container) {
       $unitPanel.appendTo($container);
     };
 
     self.hasScore = function () {
+      console.log(options.maxScore);
       return (options.maxScore !== 0);
     };
 
@@ -57,7 +95,7 @@ H5P.MiniCourse.CourseUnit = (function ($, EventDispatcher) {
     self.enable = function () {
       enabled = true;
       $unitPanel.removeClass('locked').addClass('enabled');
-      $beginButton.html('Begin').removeAttr('disabled'); // TODO - translate
+      $beginButton.html(dictionary.lessonStartLabel).removeAttr('disabled').attr('data-state', 'ready');
 
       setTimeout(function () {
         $beginButton.focus();
@@ -77,20 +115,47 @@ H5P.MiniCourse.CourseUnit = (function ($, EventDispatcher) {
           var isParent = (stmt.context.contextActivities.parent === undefined);
 
           if (isParent && stmt.result !== undefined && stmt.result.completion === true) {
-            setTimeout(function () {
-              self.hide(event.getScore());
-            }, 2000);
+            self.score = event.getScore();
+            self.headerButton.continue();
           }
         });
 
+
         var $h5pContent = $('<div>', {
           'class': 'h5p-sub-content'
-        }).appendTo($unitPopup);
+        });
 
         instance.attach($h5pContent);
-        $unitPopup.prepend('<div class="header">' + options.header + '<a href="javascript:void(0)" class="quit-lesson">Quit lesson</a></div>');
 
-        $unitPopup.find('.quit-lesson').click(function () {
+        self.headerButton = new HeaderButton(dictionary);
+        if (!self.hasScore()) {
+          self.headerButton.continue();
+        }
+
+        var $header = $('<div>', {
+          'class': 'header',
+          text: options.header,
+          append: self.headerButton.getDomElement()
+        });
+
+        //$unitPopup.prepend($header);
+        //$
+
+
+        self.headerButton.on('skip', function (event) {
+          var confirmDialog = new H5P.ConfirmationDialog({headerText: 'Are you sure?', dialogText: 'If quiting this lesson, no score will be given.'});
+          confirmDialog.appendTo($unitPopup.get(0));
+          confirmDialog.on('confirmed', function () {
+            self.hide();
+          });
+          confirmDialog.show();
+        });
+
+        self.headerButton.on('continue', function (event) {
+            self.hide(self.score);
+        });
+
+        /*$unitPopup.find('.quit-lesson').click(function () {
           if (self.hasScore()) {
             var confirmDialog = new H5P.ConfirmationDialog({headerText: 'Are you sure?', dialogText: 'If quiting this lesson, no score will be given.'});
             confirmDialog.appendTo($unitPopup.get(0));
@@ -102,7 +167,7 @@ H5P.MiniCourse.CourseUnit = (function ($, EventDispatcher) {
           else {
             self.hide();
           }
-        });
+        });*/
       }
 
       // Attach popup to body:
@@ -110,22 +175,28 @@ H5P.MiniCourse.CourseUnit = (function ($, EventDispatcher) {
       //$popupContainer.append($unitPopupBg);
 
       // Hide if ESC is pressed
-      $('body').on('keyup.h5p-escape', function (event) {
+      /*$('body').on('keyup.h5p-escape', function (event) {
         if (event.keyCode == 27) {
           $unitPopup.find('.quit-lesson').click();
         }
-      });
+      });*/
 
-      setTimeout(function () {
+      /*setTimeout(function () {
         $unitPopup.addClass('visible');
-      }, 200);
+      }, 200);*/
 
       self.trigger('open-popup', {
-        popup: $unitPopup,
-        unit: self
+        popupContent: [
+          $header,
+          $h5pContent
+        ],
+        index: index
       });
-
+      instance.on('resize', function () {
+        self.trigger('resize');
+      });
       instance.trigger('resize');
+      self.trigger('resize');
     };
 
     self.setWidth = function (width) {
@@ -136,16 +207,17 @@ H5P.MiniCourse.CourseUnit = (function ($, EventDispatcher) {
       $('body').off('keyup.h5p-escape');
 
       self.trigger('closing-popup');
-      $unitPopup.removeClass('visible');
+
+      // Set score in unit-header
+      unitHeader.setState('completed', score);
 
       setTimeout(function () {
-        $unitPopup.detach();
-        self.trigger('finished', {index: index, score: score});
+        self.trigger('finished', {index: index, score: score, maxScore: self.getMaxScore()});
       }, 1000);
     };
 
     self.done = function () {
-      $beginButton.html('Done').attr('disabled', 'disabled');
+      $beginButton.html(dictionary.lessonCompletedLabel).attr('disabled', 'disabled');
       $unitPanel.removeClass('enabled').addClass('done');
     };
 
@@ -153,9 +225,45 @@ H5P.MiniCourse.CourseUnit = (function ($, EventDispatcher) {
       if (instance && instance.resetTask) {
         instance.resetTask();
       }
-      $beginButton.html('Locked');
+      $beginButton.html(dictionary.lessonLockedLabel);
+      self.headerButton.skip();
       $unitPanel.removeClass('done').addClass('locked');
     };
+
+    /*var $unitPopup = $('<div>', {
+      'class': 'h5p-mini-course-popup ' + machineName
+    });*/
+
+    var $unitPanel = $('<div>', {
+      'class': 'h5p-mini-course-unit-panel locked'
+    });
+
+    var $unitPanelInner = $('<div>', {
+      'class': 'h5p-mini-course-unit-panel-inner ' + machineName,
+      tabIndex: 0
+    }).appendTo($unitPanel);
+
+    var unitHeader = new UnitHeader(self.getMaxScore(), dictionary);
+    unitHeader.getDomElement().appendTo($unitPanelInner);
+
+    $('<div>', {
+      'class': 'h5p-mini-course-unit-title',
+      html: options.header
+    }).appendTo($unitPanelInner);
+
+    var $unitIntro = $('<div>', {
+      'class': 'h5p-mini-course-unit-intro',
+      html: options.intro
+    }).appendTo($unitPanelInner);
+
+    var $beginButton = $('<button>', {
+      'class': 'h5p-mini-course-unit-begin',
+      html: dictionary.lessonLockedLabel,
+      disabled: 'disabled',
+      click: function () {
+        self.show();
+      }
+    }).appendTo($unitPanelInner);
   }
 
   // Inheritance
